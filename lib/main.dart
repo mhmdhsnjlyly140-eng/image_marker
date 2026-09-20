@@ -30,12 +30,10 @@ class _HomePageState extends State<HomePage> {
     final seed = Random().nextInt(999999);
     final prompt = Uri.encodeComponent(_controller.text);
     setState(() {
-      _imageUrl = 'https://image.pollinations.ai/prompt/$prompt?seed=$seed&nologo=true&width=768&height=768';
+      // استفاده از پروکسی allorigins
+      final raw = 'https://image.pollinations.ai/prompt/$prompt?seed=$seed&nologo=true&width=768&height=768';
+      _imageUrl = 'https://api.allorigins.win/raw?url=${Uri.encodeComponent(raw)}';
     });
-  }
-
-  void _retry() {
-    _generate();
   }
 
   @override
@@ -64,7 +62,7 @@ class _HomePageState extends State<HomePage> {
                 const SizedBox(width: 12),
                 if (_imageUrl != null)
                   OutlinedButton(
-                    onPressed: _retry,
+                    onPressed: _generate,
                     child: const Text('دوباره'),
                   ),
               ],
@@ -86,10 +84,8 @@ class _HomePageState extends State<HomePage> {
                         children: [
                           const Text('عکس لود نشد 😕'),
                           const SizedBox(height: 8),
-                          const Text('شاید اینترنت یا فیلتر مشکل داره'),
-                          const SizedBox(height: 8),
                           ElevatedButton(
-                            onPressed: _retry,
+                            onPressed: _generate,
                             child: const Text('دوباره امتحان کن'),
                           ),
                         ],
