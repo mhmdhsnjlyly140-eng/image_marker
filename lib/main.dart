@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'dart:math';
 
 void main() => runApp(const MyApp());
@@ -9,6 +8,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       home: const HomePage(),
       theme: ThemeData.dark(),
     );
@@ -24,18 +24,18 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   final TextEditingController _controller = TextEditingController();
   String? _imageUrl;
-  bool _loading = false;
 
-  Future<void> _generate() async {
+  void _generate() {
     if (_controller.text.isEmpty) return;
-    setState(() => _loading = true);
     final seed = Random().nextInt(999999);
     final prompt = Uri.encodeComponent(_controller.text);
-    final url = 'https://image.pollinations.ai/prompt/$prompt?seed=$seed&nologo=true';
     setState(() {
-      _imageUrl = url;
-      _loading = false;
+      _imageUrl = 'https://image.pollinations.ai/prompt/$prompt?seed=$seed&nologo=true&width=768&height=768';
     });
+  }
+
+  void _retry() {
+    _generate();
   }
 
   @override
@@ -54,14 +54,49 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
             const SizedBox(height: 12),
-            ElevatedButton(
-              onPressed: _loading ? null : _generate,
-              child: Text(_loading ? 'در حال ساخت...' : 'بساز!'),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                ElevatedButton(
+                  onPressed: _generate,
+                  child: const Text('بساز!'),
+                ),
+                const SizedBox(width: 12),
+                if (_imageUrl != null)
+                  OutlinedButton(
+                    onPressed: _retry,
+                    child: const Text('دوباره'),
+                  ),
+              ],
             ),
             const SizedBox(height: 20),
             if (_imageUrl != null)
               Expanded(
-                child: Image.network(_imageUrl!, fit: BoxFit.contain),
+                child: Image.network(
+                  _imageUrl!,
+                  fit: BoxFit.contain,
+                  loadingBuilder: (c, child, progress) {
+                    if (progress == null) return child;
+                    return const Center(child: CircularProgressIndicator());
+                  },
+                  errorBuilder: (c, e, s) {
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Text('عکس لود نشد 😕'),
+                          const SizedBox(height: 8),
+                          const Text('شاید اینترنت یا فیلتر مشکل داره'),
+                          const SizedBox(height: 8),
+                          ElevatedButton(
+                            onPressed: _retry,
+                            child: const Text('دوباره امتحان کن'),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
               ),
           ],
         ),
