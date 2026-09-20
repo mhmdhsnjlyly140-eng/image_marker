@@ -23,6 +23,11 @@ jobs:
           flutter-version: '3.24.0'
           channel: 'stable'
 
+      - name: Fix Android project
+        run: |
+          rm -rf android
+          flutter create --platforms=android --org com.example --project-name image_maker .
+
       - name: Get dependencies
         run: flutter pub get
 
