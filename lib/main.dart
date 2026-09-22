@@ -22,6 +22,7 @@ class AppTheme {
   static const brown = Color(0xFF8B4513);
   static const dark = Color(0xFF1A1A1A);
   static const darkCard = Color(0xFF2A2A2A);
+  static const grass = Color(0xFF2D5016);
 }
 
 // ============================================================
@@ -245,190 +246,168 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.dark,
+      backgroundColor: AppTheme.grass,
       body: SafeArea(
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            final screenHeight = constraints.maxHeight;
-            final waterfallHeight = screenHeight * 0.55;
-            final roadHeight = screenHeight * 0.45;
+        child: Stack(
+          children: [
+            // ===== ۱. پس‌زمینه سبز (کل صفحه) =====
+            Positioned.fill(
+              child: Container(
+                color: AppTheme.grass,
+              ),
+            ),
 
-            return Stack(
-              children: [
-                // ===== ۱. پس‌زمینه آبشار =====
-                Positioned(
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  height: waterfallHeight,
-                  child: ImageHelper.load(
-                    path: 'assets/images/waterfall.png',
-                    fallbackEmoji: '🏞️',
-                    width: double.infinity,
-                    height: waterfallHeight,
-                    fit: BoxFit.cover,
-                  ),
-                ),
+            // ===== ۲. آبشار (بالا) =====
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              height: 320,
+              child: ImageHelper.load(
+                path: 'assets/images/waterfall.png',
+                fallbackEmoji: '🏞️',
+                width: double.infinity,
+                height: 320,
+                fit: BoxFit.cover,
+              ),
+            ),
 
-                // ===== ۲. جاده =====
-                Positioned(
-                  top: waterfallHeight,
-                  left: 0,
-                  right: 0,
-                  height: roadHeight,
-                  child: ImageHelper.load(
-                    path: 'assets/images/jadeh.png',
-                    fallbackEmoji: '🛤️',
-                    width: double.infinity,
-                    height: roadHeight,
-                    fit: BoxFit.cover,
-                  ),
-                ),
+            // ===== ۳. جاده (وسط) =====
+            Positioned(
+              top: 280,
+              left: 30,
+              right: 30,
+              height: 400,
+              child: ImageHelper.load(
+                path: 'assets/images/jadeh.png',
+                fallbackEmoji: '🛤️',
+                width: double.infinity,
+                height: 400,
+                fit: BoxFit.contain,
+              ),
+            ),
 
-                // ===== ۳. دکان ممد (چپ) =====
-                Positioned(
-                  top: waterfallHeight - 30,
-                  left: 15,
-                  child: GestureDetector(
-                    onTap: () => setState(() => money += 10),
-                    child: Column(
-                      children: [
-                        ImageHelper.load(
-                          path: 'assets/images/boofe.png',
-                          fallbackEmoji: '🏪',
-                          width: 110,
-                          height: 110,
-                        ),
-                        const SizedBox(height: 4),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.black.withOpacity(0.8),
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: AppTheme.gold),
-                          ),
-                          child: const Text(
-                            'ممد',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 11,
-                            ),
-                          ),
-                        ),
-                      ],
+            // ===== ۴. دکان ممد (چپ) =====
+            Positioned(
+              top: 280,
+              left: 5,
+              child: GestureDetector(
+                onTap: () => setState(() => money += 10),
+                child: Column(
+                  children: [
+                    ImageHelper.load(
+                      path: 'assets/images/boofe.png',
+                      fallbackEmoji: '🏪',
+                      width: 100,
+                      height: 100,
                     ),
-                  ),
+                    const SizedBox(height: 4),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.black.withOpacity(0.8),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: AppTheme.gold),
+                      ),
+                      child: const Text(
+                        'ممد',
+                        style: TextStyle(color: Colors.white, fontSize: 11),
+                      ),
+                    ),
+                  ],
                 ),
+              ),
+            ),
 
-                // ===== ۴. دکان حاج آقا (راست) =====
-                Positioned(
-                  top: waterfallHeight - 30,
-                  right: 15,
-                  child: GestureDetector(
-                    onTap: () {
-                      Get.snackbar(
+            // ===== ۵. دکان حاج آقا (راست) =====
+            Positioned(
+              top: 280,
+              right: 5,
+              child: GestureDetector(
+                onTap: () {
+                  Get.snackbar(
+                    'حاج آقا',
+                    'رقیب قدیمی... ۳۰ ساله اینجاست!',
+                    backgroundColor: AppTheme.darkCard,
+                    colorText: Colors.white,
+                  );
+                },
+                child: Column(
+                  children: [
+                    ImageHelper.load(
+                      path: 'assets/images/haj_agha_shop.png',
+                      fallbackEmoji: '🏚️',
+                      width: 100,
+                      height: 100,
+                    ),
+                    const SizedBox(height: 4),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.black.withOpacity(0.8),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: AppTheme.red),
+                      ),
+                      child: const Text(
                         'حاج آقا',
-                        'رقیب قدیمی... ۳۰ ساله اینجاست!',
-                        backgroundColor: AppTheme.darkCard,
-                        colorText: Colors.white,
-                      );
-                    },
-                    child: Column(
-                      children: [
-                        ImageHelper.load(
-                          path: 'assets/images/haj_agha_shop.png',
-                          fallbackEmoji: '🏚️',
-                          width: 110,
-                          height: 110,
-                        ),
-                        const SizedBox(height: 4),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.black.withOpacity(0.8),
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: AppTheme.red),
-                          ),
-                          child: const Text(
-                            'حاج آقا',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 11,
-                            ),
-                          ),
-                        ),
-                      ],
+                        style: TextStyle(color: Colors.white, fontSize: 11),
+                      ),
                     ),
-                  ),
+                  ],
                 ),
+              ),
+            ),
 
-                // ===== ۵. شخصیت ممد (وسط) =====
-                Positioned(
-                  bottom: 160,
-                  left: 0,
-                  right: 0,
-                  child: Center(
-                    child: ImageHelper.load(
-                      path: 'assets/images/characters/mamad.png',
-                      fallbackEmoji: '👨',
-                      width: 70,
-                      height: 70,
-                    ),
-                  ),
-                ),
+            // ===== ۶. نوار بالا (پول) =====
+            Positioned(
+              top: 16,
+              left: 16,
+              right: 16,
+              child: _buildTopBar(),
+            ),
 
-                // ===== ۶. نوار بالا (پول) =====
-                Positioned(
-                  top: 16,
-                  left: 16,
-                  right: 16,
-                  child: _buildTopBar(),
-                ),
+            // ===== ۷. دکمه خونه =====
+            Positioned(
+              top: 110,
+              left: 20,
+              child: _mapButton('خونه', '🏠', () {
+                Get.snackbar(
+                  'خونه',
+                  '۷۵ کیلومتر تا اینجا...',
+                  backgroundColor: AppTheme.darkCard,
+                  colorText: Colors.white,
+                );
+              }),
+            ),
 
-                // ===== ۷. دکمه خونه =====
-                Positioned(
-                  top: 110,
-                  left: 20,
-                  child: _mapButton('خونه', '🏠', () {
-                    Get.snackbar(
-                      'خونه',
-                      '۷۵ کیلومتر تا اینجا...',
-                      backgroundColor: AppTheme.darkCard,
-                      colorText: Colors.white,
-                    );
-                  }),
-                ),
+            // ===== ۸. دکمه ماشین =====
+            Positioned(
+              top: 110,
+              right: 20,
+              child: _mapButton('ماشین', '🚗', () {
+                Get.snackbar(
+                  'ماشین',
+                  'پیکان قدیمی...',
+                  backgroundColor: AppTheme.darkCard,
+                  colorText: Colors.white,
+                );
+              }),
+            ),
 
-                // ===== ۸. دکمه ماشین =====
-                Positioned(
-                  top: 110,
-                  right: 20,
-                  child: _mapButton('ماشین', '🚗', () {
-                    Get.snackbar(
-                      'ماشین',
-                      'پیکان قدیمی...',
-                      backgroundColor: AppTheme.darkCard,
-                      colorText: Colors.white,
-                    );
-                  }),
-                ),
-
-                // ===== ۹. دکمه‌های پایین =====
-                Positioned(
-                  bottom: 16,
-                  left: 16,
-                  right: 16,
-                  child: _buildButtons(),
-                ),
-              ],
-            );
-          },
+            // ===== ۹. نوار پایین (دکمه‌ها) =====
+            Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              child: _buildBottomBar(),
+            ),
+          ],
         ),
       ),
     );
@@ -502,14 +481,18 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  // ===== دکمه‌های پایین =====
-  Widget _buildButtons() {
+  // ===== نوار پایین =====
+  Widget _buildBottomBar() {
     return Container(
-      padding: const EdgeInsets.all(8),
+      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
       decoration: BoxDecoration(
-        color: Colors.black.withOpacity(0.7),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppTheme.gold.withOpacity(0.5)),
+        color: AppTheme.dark.withOpacity(0.95),
+        border: Border(
+          top: BorderSide(
+            color: AppTheme.gold.withOpacity(0.7),
+            width: 2,
+          ),
+        ),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -529,23 +512,25 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  // ===== دکمه نوار پایین =====
   Widget _menuButton(String label, String emoji, VoidCallback onTap) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
         decoration: BoxDecoration(
-          color: AppTheme.blue.withOpacity(0.5),
+          color: AppTheme.blue.withOpacity(0.6),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(color: AppTheme.blue),
         ),
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
             Text(emoji, style: const TextStyle(fontSize: 24)),
             const SizedBox(height: 2),
             Text(
               label,
-              style: const TextStyle(color: Colors.white, fontSize: 11),
+              style: const TextStyle(color: Colors.white, fontSize: 12),
             ),
           ],
         ),
