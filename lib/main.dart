@@ -1,4 +1,6 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
 // ============================================================
@@ -225,39 +227,102 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  // پول کل
   int money = 0;
-  int perSecond = 1;
+
+  // ===== دکان ممد =====
+  int mamadPending = 0;
+  int mamadLevel = 1;
+  int mamadCycleSeconds = 5;
+
+  int get mamadMaxPending => mamadLevel * 10;
+  int get mamadPerCycle => mamadLevel * 10;
+
+  // ===== دکان حاج آقا (نمایش) =====
+  int hajAghaPending = 0;
+  int hajAghaLevel = 3;
+  int hajAghaCycleSeconds = 5;
+
+  int get hajAghaMaxPending => hajAghaLevel * 10;
+  int get hajAghaPerCycle => hajAghaLevel * 10;
+
+  Timer? _mamadTimer;
+  Timer? _hajAghaTimer;
 
   @override
   void initState() {
     super.initState();
-    _startIncome();
+    _startTimers();
   }
 
-  void _startIncome() {
-    Future.delayed(const Duration(seconds: 1), () {
-      if (mounted) {
-        setState(() => money += perSecond);
-        _startIncome();
-      }
-    });
+  @override
+  void dispose() {
+    _mamadTimer?.cancel();
+    _hajAghaTimer?.cancel();
+    super.dispose();
+  }
+
+  void _startTimers() {
+    // دکان ممد
+    _mamadTimer = Timer.periodic(
+      Duration(seconds: mamadCycleSeconds),
+      (timer) {
+        if (mounted) {
+          setState(() {
+            if (mamadPending < mamadMaxPending) {
+              mamadPending += mamadPerCycle;
+              if (mamadPending > mamadMaxPending) {
+                mamadPending = mamadMaxPending;
+              }
+            }
+          });
+        }
+      },
+    );
+
+    // دکان حاج آقا
+    _hajAghaTimer = Timer.periodic(
+      Duration(seconds: hajAghaCycleSeconds),
+      (timer) {
+        if (mounted) {
+          setState(() {
+            if (hajAghaPending < hajAghaMaxPending) {
+              hajAghaPending += hajAghaPerCycle;
+              if (hajAghaPending > hajAghaMaxPending) {
+                hajAghaPending = hajAghaMaxPending;
+              }
+            }
+          });
+        }
+      },
+    );
+  }
+
+  void _collectMamad() {
+    if (mamadPending > 0) {
+      setState(() {
+        money += mamadPending;
+        mamadPending = 0;
+      });
+      HapticFeedback.mediumImpact();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    final mamadIsFull = mamadPending >= mamadMaxPending;
+
     return Scaffold(
       backgroundColor: AppTheme.grass,
       body: SafeArea(
         child: Stack(
           children: [
-            // ===== ۱. پس‌زمینه سبز (کل صفحه) =====
+            // ===== ۱. پس‌زمینه سبز =====
             Positioned.fill(
-              child: Container(
-                color: AppTheme.grass,
-              ),
+              child: Container(color: AppTheme.grass),
             ),
 
-            // ===== ۲. آبشار (بالا) =====
+            // ===== ۲. آبشار =====
             Positioned(
               top: 0,
               left: 0,
@@ -272,91 +337,168 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
 
-            // ===== ۳. جاده (وسط) =====
+            // ===== ۳. جاده =====
             Positioned(
               top: 280,
               left: 30,
               right: 30,
-              height: 400,
+              height: 450,
               child: ImageHelper.load(
                 path: 'assets/images/jadeh.png',
                 fallbackEmoji: '🛤️',
                 width: double.infinity,
-                height: 400,
+                height: 450,
                 fit: BoxFit.contain,
               ),
             ),
 
-            // ===== ۴. دکان ممد (چپ) =====
+            // ===== ۴. دکان ممد =====
             Positioned(
-              top: 280,
-              left: 5,
-              child: GestureDetector(
-                onTap: () => setState(() => money += 10),
-                child: Column(
-                  children: [
-                    ImageHelper.load(
+              top: 380,
+              left: 0,
+              child: Column(
+                children: [
+                  GestureDetector(
+                    onTap: _collectMamad,
+                    child: ImageHelper.load(
                       path: 'assets/images/boofe.png',
                       fallbackEmoji: '🏪',
-                      width: 100,
-                      height: 100,
+                      width: 130,
+                      height: 130,
                     ),
-                    const SizedBox(height: 4),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.black.withOpacity(0.8),
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: AppTheme.gold),
-                      ),
-                      child: const Text(
-                        'ممد',
-                        style: TextStyle(color: Colors.white, fontSize: 11),
+                  ),
+                  const SizedBox(height: 4),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withOpacity(0.8),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: AppTheme.gold, width: 2),
+                    ),
+                    child: Text(
+                      'ممد - سطح $mamadLevel',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
 
-            // ===== ۵. دکان حاج آقا (راست) =====
+            // ===== ۵. آیکون پول دکان ممد =====
             Positioned(
-              top: 280,
-              right: 5,
+              top: 400,
+              left: 110,
               child: GestureDetector(
-                onTap: () {
-                  Get.snackbar(
-                    'حاج آقا',
-                    'رقیب قدیمی... ۳۰ ساله اینجاست!',
-                    backgroundColor: AppTheme.darkCard,
-                    colorText: Colors.white,
-                  );
-                },
-                child: Column(
-                  children: [
-                    ImageHelper.load(
-                      path: 'assets/images/haj_agha_shop.png',
-                      fallbackEmoji: '🏚️',
-                      width: 100,
-                      height: 100,
+                onTap: _collectMamad,
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 300),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.85),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: mamadIsFull ? AppTheme.red : AppTheme.gold,
+                      width: 2,
                     ),
-                    const SizedBox(height: 4),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
+                    boxShadow: [
+                      BoxShadow(
+                        color: (mamadIsFull ? AppTheme.red : AppTheme.gold)
+                            .withOpacity(mamadPending > 0 ? 0.7 : 0.2),
+                        blurRadius: mamadPending > 0 ? 15 : 5,
+                        spreadRadius: mamadPending > 0 ? 3 : 1,
                       ),
-                      decoration: BoxDecoration(
-                        color: Colors.black.withOpacity(0.8),
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: AppTheme.red),
+                    ],
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Text('💰', style: TextStyle(fontSize: 20)),
+                      const SizedBox(width: 4),
+                      Text(
+                        '$mamadPending/$mamadMaxPending',
+                        style: TextStyle(
+                          color: mamadIsFull ? AppTheme.red : AppTheme.gold,
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                      child: const Text(
-                        'حاج آقا',
-                        style: TextStyle(color: Colors.white, fontSize: 11),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+
+            // ===== ۶. دکان حاج آقا =====
+            Positioned(
+              top: 380,
+              right: 0,
+              child: Column(
+                children: [
+                  ImageHelper.load(
+                    path: 'assets/images/haj_agha_shop.png',
+                    fallbackEmoji: '🏚️',
+                    width: 130,
+                    height: 130,
+                  ),
+                  const SizedBox(height: 4),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withOpacity(0.8),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: AppTheme.red, width: 2),
+                    ),
+                    child: Text(
+                      'حاج آقا - سطح $hajAghaLevel',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // ===== ۷. آیکون پول دکان حاج آقا =====
+            Positioned(
+              top: 400,
+              right: 110,
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 8,
+                  vertical: 6,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.black.withOpacity(0.85),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: AppTheme.red, width: 2),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text('💰', style: TextStyle(fontSize: 20)),
+                    const SizedBox(width: 4),
+                    Text(
+                      '$hajAghaPending/$hajAghaMaxPending',
+                      style: const TextStyle(
+                        color: AppTheme.red,
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                   ],
@@ -364,7 +506,7 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
 
-            // ===== ۶. نوار بالا (پول) =====
+            // ===== ۸. نوار بالا =====
             Positioned(
               top: 16,
               left: 16,
@@ -372,35 +514,27 @@ class _HomePageState extends State<HomePage> {
               child: _buildTopBar(),
             ),
 
-            // ===== ۷. دکمه خونه =====
+            // ===== ۹. دکمه خونه =====
             Positioned(
               top: 110,
               left: 20,
               child: _mapButton('خونه', '🏠', () {
-                Get.snackbar(
-                  'خونه',
-                  '۷۵ کیلومتر تا اینجا...',
-                  backgroundColor: AppTheme.darkCard,
-                  colorText: Colors.white,
-                );
+                Get.snackbar('خونه', '۷۵ کیلومتر...',
+                  backgroundColor: AppTheme.darkCard, colorText: Colors.white);
               }),
             ),
 
-            // ===== ۸. دکمه ماشین =====
+            // ===== ۱۰. دکمه ماشین =====
             Positioned(
               top: 110,
               right: 20,
               child: _mapButton('ماشین', '🚗', () {
-                Get.snackbar(
-                  'ماشین',
-                  'پیکان قدیمی...',
-                  backgroundColor: AppTheme.darkCard,
-                  colorText: Colors.white,
-                );
+                Get.snackbar('ماشین', 'پیکان...',
+                  backgroundColor: AppTheme.darkCard, colorText: Colors.white);
               }),
             ),
 
-            // ===== ۹. نوار پایین (دکمه‌ها) =====
+            // ===== ۱۱. نوار پایین =====
             Positioned(
               bottom: 0,
               left: 0,
@@ -413,7 +547,6 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  // ===== نوار بالا =====
   Widget _buildTopBar() {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -442,7 +575,7 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
               Text(
-                '+$perSecond تومن/ثانیه',
+                'سطح $mamadLevel: +$mamadPerCycle هر ۵ ثانیه',
                 style: const TextStyle(
                   color: AppTheme.green,
                   fontSize: 11,
@@ -456,7 +589,6 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  // ===== دکمه نقشه =====
   Widget _mapButton(String label, String emoji, VoidCallback onTap) {
     return GestureDetector(
       onTap: onTap,
@@ -481,7 +613,6 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  // ===== نوار پایین =====
   Widget _buildBottomBar() {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
@@ -500,19 +631,14 @@ class _HomePageState extends State<HomePage> {
           _menuButton('داستان', '📖', () => Get.offAllNamed('/story')),
           _menuButton('ارتقا', '🔼', () => Get.toNamed('/upgrade')),
           _menuButton('رقیب', '👴', () {
-            Get.snackbar(
-              'حاج آقا',
-              'رقیب قدیمی شهر...',
-              backgroundColor: AppTheme.darkCard,
-              colorText: Colors.white,
-            );
+            Get.snackbar('حاج آقا', 'رقیب قدیمی...',
+              backgroundColor: AppTheme.darkCard, colorText: Colors.white);
           }),
         ],
       ),
     );
   }
 
-  // ===== دکمه نوار پایین =====
   Widget _menuButton(String label, String emoji, VoidCallback onTap) {
     return GestureDetector(
       onTap: onTap,
@@ -551,7 +677,7 @@ class UpgradePage extends StatelessWidget {
       {
         'name': 'بوفه چوبی',
         'price': 'رایگان',
-        'income': '۱ تومن/ثانیه',
+        'income': '۱۰ هر ۵ ثانیه',
         'emoji': '🏪',
         'image': 'boofe.png',
         'level': 1,
@@ -559,7 +685,7 @@ class UpgradePage extends StatelessWidget {
       {
         'name': 'چای‌خانه',
         'price': '۵۰۰',
-        'income': '۵ تومن/ثانیه',
+        'income': '۵۰ هر ۵ ثانیه',
         'emoji': '☕',
         'image': 'chai_khane.png',
         'level': 0,
@@ -567,7 +693,7 @@ class UpgradePage extends StatelessWidget {
       {
         'name': 'بستنی‌فروشی',
         'price': '۵,۰۰۰',
-        'income': '۲۵ تومن/ثانیه',
+        'income': '۲۵۰ هر ۵ ثانیه',
         'emoji': '🍦',
         'image': 'bastani.png',
         'level': 0,
@@ -575,7 +701,7 @@ class UpgradePage extends StatelessWidget {
       {
         'name': 'ساندویچی',
         'price': '۵۰,۰۰۰',
-        'income': '۱۵۰ تومن/ثانیه',
+        'income': '۱,۵۰۰ هر ۵ ثانیه',
         'emoji': '🥪',
         'image': 'sandwichi.png',
         'level': 0,
@@ -583,7 +709,7 @@ class UpgradePage extends StatelessWidget {
       {
         'name': 'رستوران آبشار',
         'price': '۱,۰۰۰,۰۰۰',
-        'income': '۱,۰۰۰ تومن/ثانیه',
+        'income': '۱۰,۰۰۰ هر ۵ ثانیه',
         'emoji': '🍽️',
         'image': 'restaurant.png',
         'level': 0,
