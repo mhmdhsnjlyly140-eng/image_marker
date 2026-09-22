@@ -1,5 +1,5 @@
 name: pol_chi
-description: بازی پول‌چی - الیگودرز ۱۴۰۵
+description: بازی پول‌چی
 publish_to: 'none'
 version: 1.0.0+1
 
@@ -10,12 +10,6 @@ dependencies:
   flutter:
     sdk: flutter
   get: ^4.6.6
-  isar: ^3.1.0+1
-  isar_flutter_libs: ^3.1.0+1
-  audioplayers: ^5.2.1
-  shared_preferences: ^2.2.2
-  google_fonts: ^6.1.0
-  flutter_animate: ^4.5.0
 
 dev_dependencies:
   flutter_test:
