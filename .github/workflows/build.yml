@@ -25,11 +25,9 @@ jobs:
           flutter-version: '3.19.0'
           channel: 'stable'
       
-      # ساخت پروژه جدید Flutter
       - name: Create Flutter project
         run: flutter create --org com.polchi --project-name pol_chi --platforms=android temp_project
       
-      # کپی کد تو
       - name: Copy code
         run: |
           cp lib/main.dart temp_project/lib/main.dart
