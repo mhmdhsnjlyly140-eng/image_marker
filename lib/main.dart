@@ -44,7 +44,7 @@ class PolChiApp extends StatelessWidget {
           foregroundColor: Colors.white,
         ),
       ),
-      initialRoute: '/story',  // ← اول داستان
+      initialRoute: '/story',
       getPages: [
         GetPage(name: '/story', page: () => const StoryPage()),
         GetPage(name: '/', page: () => const HomePage()),
@@ -127,17 +127,14 @@ class _StoryPageState extends State<StoryPage> {
   }
 
   void _startStory() async {
-    // اول خالی، بعد خط به خط
     for (int i = 0; i < _lines.length; i++) {
       await Future.delayed(const Duration(seconds: 3));
       if (mounted) setState(() => _currentLine = i + 1);
     }
-    // بعد از اتمام، دکمه رو نشون بده
     await Future.delayed(const Duration(milliseconds: 500));
     if (mounted) setState(() => _showButton = true);
   }
 
-  // کاربر می‌تونه با کلیک، سرعت بده
   void _skipForward() {
     if (_currentLine < _lines.length) {
       setState(() => _currentLine = _lines.length);
@@ -157,7 +154,6 @@ class _StoryPageState extends State<StoryPage> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // شخصیت ممد (وقتی خط اول رد شد)
                 if (_currentLine > 0)
                   ImageHelper.load(
                     path: 'assets/images/characters/mamad.png',
@@ -166,8 +162,6 @@ class _StoryPageState extends State<StoryPage> {
                     height: 180,
                   ),
                 const SizedBox(height: 24),
-
-                // متن داستان
                 Expanded(
                   child: SingleChildScrollView(
                     child: Column(
@@ -188,16 +182,11 @@ class _StoryPageState extends State<StoryPage> {
                     ),
                   ),
                 ),
-
-                // دکمه شروع بازی
                 if (_showButton)
                   Padding(
                     padding: const EdgeInsets.only(top: 16),
                     child: ElevatedButton(
-                      onPressed: () {
-                        // برو به نقشه (و داستان رو پاک کن)
-                        Get.offAllNamed('/');
-                      },
+                      onPressed: () => Get.offAllNamed('/'),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppTheme.gold,
                         foregroundColor: Colors.black,
@@ -258,122 +247,194 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       backgroundColor: AppTheme.dark,
       body: SafeArea(
-        child: Stack(
-          children: [
-            // پس‌زمینه آبشار
-            Positioned.fill(
-              child: ImageHelper.load(
-                path: 'assets/images/waterfall.png',
-                fallbackEmoji: '🏞️',
-                width: double.infinity,
-                height: double.infinity,
-                fit: BoxFit.cover,
-              ),
-            ),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final screenHeight = constraints.maxHeight;
+            final waterfallHeight = screenHeight * 0.55;
+            final roadHeight = screenHeight * 0.45;
 
-            // لایه تاریک روی پس‌زمینه
-            Positioned.fill(
-              child: Container(
-                color: Colors.black.withOpacity(0.3),
-              ),
-            ),
-
-            // نوار بالا (پول)
-            Positioned(
-              top: 16,
-              left: 16,
-              right: 16,
-              child: _buildTopBar(),
-            ),
-
-            // دکمه خونه (بالا چپ)
-            Positioned(
-              top: 120,
-              left: 20,
-              child: _mapButton('خونه', '🏠', () {
-                Get.snackbar(
-                  'خونه',
-                  '۷۵ کیلومتر تا اینجا...',
-                  backgroundColor: AppTheme.darkCard,
-                  colorText: Colors.white,
-                );
-              }),
-            ),
-
-            // دکمه حاج آقا (بالا راست)
-            Positioned(
-              top: 120,
-              right: 20,
-              child: _mapButton('حاج آقا', '👴', () {
-                Get.snackbar(
-                  'حاج آقا',
-                  'رقیب قدیمی...',
-                  backgroundColor: AppTheme.darkCard,
-                  colorText: Colors.white,
-                );
-              }),
-            ),
-
-            // دکان ممد (وسط)
-            Positioned(
-              top: 200,
-              left: 0,
-              right: 0,
-              child: Center(
-                child: GestureDetector(
-                  onTap: () => setState(() => money += 10),
+            return Stack(
+              children: [
+                // ===== ۱. پس‌زمینه آبشار =====
+                Positioned(
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  height: waterfallHeight,
                   child: ImageHelper.load(
-                    path: 'assets/images/boofe.png',
-                    fallbackEmoji: '🏪',
-                    width: 200,
-                    height: 200,
+                    path: 'assets/images/waterfall.png',
+                    fallbackEmoji: '🏞️',
+                    width: double.infinity,
+                    height: waterfallHeight,
+                    fit: BoxFit.cover,
                   ),
                 ),
-              ),
-            ),
 
-            // دکمه جاده (پایین چپ)
-            Positioned(
-              bottom: 180,
-              left: 20,
-              child: _mapButton('جاده', '🚗', () {
-                Get.snackbar(
-                  'جاده',
-                  '۷۵ کیلومتر...',
-                  backgroundColor: AppTheme.darkCard,
-                  colorText: Colors.white,
-                );
-              }),
-            ),
+                // ===== ۲. جاده =====
+                Positioned(
+                  top: waterfallHeight,
+                  left: 0,
+                  right: 0,
+                  height: roadHeight,
+                  child: ImageHelper.load(
+                    path: 'assets/images/jadeh.png',
+                    fallbackEmoji: '🛤️',
+                    width: double.infinity,
+                    height: roadHeight,
+                    fit: BoxFit.cover,
+                  ),
+                ),
 
-            // دکمه ماشین (پایین راست)
-            Positioned(
-              bottom: 180,
-              right: 20,
-              child: _mapButton('ماشین', '🚙', () {
-                Get.snackbar(
-                  'پیکان',
-                  'ماشین قدیمی...',
-                  backgroundColor: AppTheme.darkCard,
-                  colorText: Colors.white,
-                );
-              }),
-            ),
+                // ===== ۳. دکان ممد (چپ) =====
+                Positioned(
+                  top: waterfallHeight - 30,
+                  left: 15,
+                  child: GestureDetector(
+                    onTap: () => setState(() => money += 10),
+                    child: Column(
+                      children: [
+                        ImageHelper.load(
+                          path: 'assets/images/boofe.png',
+                          fallbackEmoji: '🏪',
+                          width: 110,
+                          height: 110,
+                        ),
+                        const SizedBox(height: 4),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.black.withOpacity(0.8),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: AppTheme.gold),
+                          ),
+                          child: const Text(
+                            'ممد',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 11,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
 
-            // دکمه‌ها (پایین)
-            Positioned(
-              bottom: 16,
-              left: 16,
-              right: 16,
-              child: _buildButtons(),
-            ),
-          ],
+                // ===== ۴. دکان حاج آقا (راست) =====
+                Positioned(
+                  top: waterfallHeight - 30,
+                  right: 15,
+                  child: GestureDetector(
+                    onTap: () {
+                      Get.snackbar(
+                        'حاج آقا',
+                        'رقیب قدیمی... ۳۰ ساله اینجاست!',
+                        backgroundColor: AppTheme.darkCard,
+                        colorText: Colors.white,
+                      );
+                    },
+                    child: Column(
+                      children: [
+                        ImageHelper.load(
+                          path: 'assets/images/haj_agha_shop.png',
+                          fallbackEmoji: '🏚️',
+                          width: 110,
+                          height: 110,
+                        ),
+                        const SizedBox(height: 4),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.black.withOpacity(0.8),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: AppTheme.red),
+                          ),
+                          child: const Text(
+                            'حاج آقا',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 11,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                // ===== ۵. شخصیت ممد (وسط) =====
+                Positioned(
+                  bottom: 160,
+                  left: 0,
+                  right: 0,
+                  child: Center(
+                    child: ImageHelper.load(
+                      path: 'assets/images/characters/mamad.png',
+                      fallbackEmoji: '👨',
+                      width: 70,
+                      height: 70,
+                    ),
+                  ),
+                ),
+
+                // ===== ۶. نوار بالا (پول) =====
+                Positioned(
+                  top: 16,
+                  left: 16,
+                  right: 16,
+                  child: _buildTopBar(),
+                ),
+
+                // ===== ۷. دکمه خونه =====
+                Positioned(
+                  top: 110,
+                  left: 20,
+                  child: _mapButton('خونه', '🏠', () {
+                    Get.snackbar(
+                      'خونه',
+                      '۷۵ کیلومتر تا اینجا...',
+                      backgroundColor: AppTheme.darkCard,
+                      colorText: Colors.white,
+                    );
+                  }),
+                ),
+
+                // ===== ۸. دکمه ماشین =====
+                Positioned(
+                  top: 110,
+                  right: 20,
+                  child: _mapButton('ماشین', '🚗', () {
+                    Get.snackbar(
+                      'ماشین',
+                      'پیکان قدیمی...',
+                      backgroundColor: AppTheme.darkCard,
+                      colorText: Colors.white,
+                    );
+                  }),
+                ),
+
+                // ===== ۹. دکمه‌های پایین =====
+                Positioned(
+                  bottom: 16,
+                  left: 16,
+                  right: 16,
+                  child: _buildButtons(),
+                ),
+              ],
+            );
+          },
         ),
       ),
     );
   }
 
-  // ====== نوار بالا ======
+  // ===== نوار بالا =====
   Widget _buildTopBar() {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -416,7 +477,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  // ====== دکمه نقشه ======
+  // ===== دکمه نقشه =====
   Widget _mapButton(String label, String emoji, VoidCallback onTap) {
     return GestureDetector(
       onTap: onTap,
@@ -441,7 +502,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  // ====== دکمه‌های پایین ======
+  // ===== دکمه‌های پایین =====
   Widget _buildButtons() {
     return Container(
       padding: const EdgeInsets.all(8),
