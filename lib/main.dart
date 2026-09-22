@@ -138,7 +138,6 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  // نوار بالا
   Widget _buildTopBar() {
     return Padding(
       padding: const EdgeInsets.all(16),
@@ -167,7 +166,6 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  // نمایش پول
   Widget _buildMoney() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -191,7 +189,6 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  // دکان
   Widget _buildShop() {
     return Center(
       child: GestureDetector(
@@ -199,7 +196,7 @@ class _HomePageState extends State<HomePage> {
           setState(() => money += 10);
         },
         child: ImageHelper.load(
-          path: 'assets/images/businesses/boofe.png',
+          path: 'assets/images/boofe.png',  // ← بدون businesses
           fallbackEmoji: '🏪',
           width: 250,
           height: 250,
@@ -208,7 +205,6 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  // وضعیت
   Widget _buildStatus() {
     return Padding(
       padding: const EdgeInsets.all(16),
@@ -237,7 +233,6 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  // دکمه‌ها
   Widget _buildButtons() {
     return Padding(
       padding: const EdgeInsets.all(16),
@@ -328,7 +323,6 @@ class _StoryPageState extends State<StoryPage> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // شخصیت ممد
                 if (_currentLine > 0)
                   ImageHelper.load(
                     path: 'assets/images/characters/mamad.png',
@@ -337,7 +331,6 @@ class _StoryPageState extends State<StoryPage> {
                     height: 200,
                   ),
                 const SizedBox(height: 24),
-                // متن
                 ..._lines.take(_currentLine).map((line) {
                   return Padding(
                     padding: const EdgeInsets.symmetric(vertical: 8),
@@ -352,7 +345,6 @@ class _StoryPageState extends State<StoryPage> {
                   );
                 }),
                 const SizedBox(height: 32),
-                // دکمه ادامه
                 if (_currentLine >= _lines.length)
                   ElevatedButton(
                     onPressed: () => Get.back(),
@@ -409,7 +401,7 @@ class UpgradePage extends StatelessWidget {
             child: Row(
               children: [
                 ImageHelper.load(
-                  path: 'assets/images/businesses/${b['image']}',
+                  path: 'assets/images/${b['image']}',  // ← بدون businesses
                   fallbackEmoji: b['emoji']!,
                   width: 60,
                   height: 60,
